@@ -15,6 +15,7 @@
     --muted: #a0a0c0;
     --accent: #8e82ff;
     --danger: #ff4757;
+    --neon-blue: #00d4ff;
   }
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 
@@ -73,7 +74,15 @@
   #title-badge { font-size: 1.3rem; font-weight: 900; text-shadow: 0 0 15px rgba(142, 130, 255, 0.4); }
   #title-badge span { color: var(--accent); }
 
-  #canvas-wrap { flex: 1; position: relative; overflow: hidden; }
+  #canvas-wrap { 
+    flex: 1; 
+    position: relative; 
+    overflow: hidden;
+    margin: 0 10px 10px 10px;
+    border: 2px solid var(--neon-blue);
+    border-radius: 20px;
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.3), inset 0 0 10px rgba(0, 212, 255, 0.2);
+  }
   canvas { display: block; width: 100%; height: 100%; touch-action: none; }
 
   .overlay {
@@ -189,7 +198,6 @@ const TIER_COLORS = [
   { h:'#ffffff', s:'#94a3b8' }  // 8+
 ];
 
-// MECHANICS
 const BASE_RADIUS = 28; 
 const SCALE_FACTOR = 1.25; 
 const GET_RADIUS = (tier) => Math.round(BASE_RADIUS * Math.pow(SCALE_FACTOR, tier - 1));
@@ -313,16 +321,10 @@ function launchPebble(sx, sy, ex, ey) {
   const dx = sx - ex, dy = sy - ey;
   let vx = dx * 0.18, vy = dy * 0.18;
   if (vy > -2) vy = -10;
-  
-  // 1. Current Pebble is fired
   const p = new Pebble(sx, LAUNCH_Y(), currentTier, vx, vy);
   pebbles.push(p);
   shots++;
-
-  // 2. Next becomes the Current
   currentTier = nextTier;
-
-  // 3. New Next is generated
   nextTier = Math.floor(Math.random() * 3) + 1;
   updateHUD();
 }
@@ -335,17 +337,14 @@ function render(now) {
   hint.style.opacity = isBusy ? "1" : (isDragging ? "0" : "0.6");
   hint.textContent = isBusy ? "Wait for settle..." : "▼ Pull back to launch";
 
-  // Danger Zone
   ctx.strokeStyle = loseTimer ? (Math.sin(now*0.015)>0 ? '#ff4757' : '#3d1010') : '#1c1c2b';
   ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(0, LOSE_Y()); ctx.lineTo(canvas.width, LOSE_Y()); ctx.stroke();
 
-  // Launcher Center Visual
   if (!isBusy) {
     const launchP = new Pebble(dragSX || canvas.width/2, LAUNCH_Y(), currentTier);
     launchP.draw();
   }
 
-  // Trajectory and Aim Line
   if (isDragging) {
     let tx = dragSX, ty = LAUNCH_Y(), tvx = (dragSX-dragCX)*0.18, tvy = Math.min((dragSY-dragCY)*0.18, -10);
     ctx.fillStyle = 'rgba(142, 130, 255, 0.5)';
